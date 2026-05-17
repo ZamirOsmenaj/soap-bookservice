@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  book.xsd  — TYPE DEFINITIONS FOR ALL BOOK OPERATIONS                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  This file defines ALL types related to the book domain:                     ║
+║    • BookType         — the core book domain object                          ║
+║    • GetBookInput     — request payload  for GetBook    (<wsdl:input>)       ║
+║    • GetBookOutput    — response payload for GetBook    (<wsdl:output>)      ║
+║    • CreateBookInput  — request payload  for CreateBook (<wsdl:input>)       ║
+║    • CreateBookOutput — response payload for CreateBook (<wsdl:output>)      ║
+║                                                                              ║
+║  WHY is BookType defined here and not in common.xsd?                         ║
+║    BookType is a domain object — it is specific to the book domain and has   ║
+║    no meaning outside of book-related operations. common.xsd is reserved     ║
+║    for purely infrastructure / cross-cutting types (auth, faults) that are   ║
+║    service-agnostic. A useful rule of thumb:                                 ║
+║      • Could this type appear in an OrderService or a PaymentService?        ║
+║        → YES: it belongs in common.xsd (e.g. WsFault, WsCredentials.java)    ║
+║        → NO:  it belongs in the domain XSD (e.g. BookType here)              ║
+║                                                                              ║
+║  WHY one file instead of one per operation?                                  ║
+║    GetBook and CreateBook operate on the SAME domain object (Book).          ║
+║    Grouping by DOMAIN (book.xsd) rather than by operation keeps things       ║
+║    cohesive:                                                                 ║
+║      • BookType and all its consumers live in one place                      ║
+║      • One namespace covers all book operations (no namespace explosion)     ║
+║      • Adding a new book operation (DeleteBook, UpdateBook) means just       ║
+║        adding elements to this file — no new file needed                     ║
+║      • Both WSDLs import the same single file → one schemaLocation           ║
+║                                                                              ║
+║  WHEN would you keep separate XSD files per operation?                       ║
+║    • Operations belong to completely different domains                       ║
+║      (e.g. BookService + AuthorService + PaymentService)                     ║
+║    • Operations are owned by different teams with different release cycles   ║
+║    • The schema is so large it becomes unmanageable in one file              ║
+║                                                                              ║
+║  One shared namespace covers all elements in this file:                      ║
+║    targetNamespace="http://bookservice.com/book/v1"                          ║
+║    All WSDLs reference this namespace with the bk: prefix.                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<xsd:schema
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://bookservice.com/book/v1"
+        targetNamespace="http://bookservice.com/book/v1"
+        elementFormDefault="qualified">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         BookType — Core book domain object
+         ═══════════════════════════════════════════════════════════════════════
+         Defined HERE because it is a book-domain concept. Both GetBook
+         (returns a book) and CreateBook (accepts a book) reference this type,
+         so it lives at the top of this file as the shared foundation for all
+         book operations below.
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <xsd:complexType name="BookType">
+        <xsd:sequence>
+
+            <!--
+            xsd:string — plain text, unlimited length.
+            ISBN format example: 978-0-13-468599-1
+            In a stricter schema you could use xsd:pattern to enforce ISBN format:
+              <xsd:restriction base="xsd:string">
+                <xsd:pattern value="\d{3}-\d-\d{2}-\d{6}-\d"/>
+              </xsd:restriction>
+            -->
+            <xsd:element name="isbn"          type="xsd:string"/>
+            <xsd:element name="title"         type="xsd:string"/>
+            <xsd:element name="author"        type="xsd:string"/>
+
+            <!--
+            xsd:decimal — arbitrary-precision decimal number.
+            Better than xsd:double for monetary values (no floating-point errors).
+            Maps to java.math.BigDecimal in Java.
+            -->
+            <xsd:element name="price"         type="xsd:decimal"/>
+
+            <!--
+            xsd:int — 32-bit signed integer (-2,147,483,648 to 2,147,483,647).
+            Maps to java.lang.Integer (or primitive int) in Java.
+            -->
+            <xsd:element name="stockQuantity" type="xsd:int"/>
+
+            <!-- minOccurs="0" → optional. Genre may not always be provided. -->
+            <xsd:element name="genre"         type="xsd:string" minOccurs="0"/>
+
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+        GetBook — Request and Response elements
+        ═══════════════════════════════════════════════════════════════════════
+        These two elements define the data shapes for the GetBook operation.
+        They are referenced in GetBook.wsdl <wsdl:message> sections as:
+          <wsdl:part element="bk:GetBookInput"  name="GetBookInput"/>
+          <wsdl:part element="bk:GetBookOutput" name="GetBookOutput"/>
+   ═══════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- GetBookInput — the CLIENT sends this in the SOAP Body to look up a book.
+         Wire format:
+           <bk:GetBookInput>
+             <bk:isbn>978-0-13-468599-1</bk:isbn>
+           </bk:GetBookInput>
+    -->
+    <xsd:element name="GetBookInput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <!--
+                The ISBN is the only input needed to look up a book.
+                Required — no minOccurs="0".
+                -->
+                <xsd:element name="isbn" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <!-- GetBookOutput — the SERVER sends this back in the SOAP Body.
+         Wire format:
+           <bk:GetBookOutput>
+             <bk:book>
+               <bk:isbn>978-0-13-468599-1</bk:isbn>
+               <bk:title>Effective Java</bk:title>
+               <bk:author>Joshua Bloch</bk:author>
+               <bk:price>49.99</bk:price>
+               <bk:stockQuantity>15</bk:stockQuantity>
+               <bk:genre>Programming</bk:genre>
+             </bk:book>
+           </bk:GetBookOutput>
+    -->
+    <xsd:element name="GetBookOutput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <!--
+                type="tns:BookType" — reuses BookType defined above in this same file.
+                -->
+                <xsd:element name="book" type="tns:BookType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+        CreateBook — Request and Response elements
+        ═══════════════════════════════════════════════════════════════════════
+        These two elements define the data shapes for the CreateBook operation.
+        They are referenced in CreateBook.wsdl <wsdl:message> sections as:
+          <wsdl:part element="bk:CreateBookInput"  name="CreateBookInput"/>
+          <wsdl:part element="bk:CreateBookOutput" name="CreateBookOutput"/>
+   ═══════════════════════════════════════════════════════════════════════════ -->
+
+    <!-- CreateBookInput — the CLIENT sends the full book details to create.
+         Wire format:
+           <bk:CreateBookInput>
+             <bk:book>
+               <bk:isbn>978-0-13-110362-7</bk:isbn>
+               <bk:title>The Pragmatic Programmer</bk:title>
+               <bk:author>David Thomas, Andrew Hunt</bk:author>
+               <bk:price>52.99</bk:price>
+               <bk:stockQuantity>50</bk:stockQuantity>
+               <bk:genre>Programming</bk:genre>
+             </bk:book>
+           </bk:CreateBookInput>
+    -->
+    <xsd:element name="CreateBookInput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <!--
+                The entire book object is sent by the client.
+                type="tns:BookType" reuses the domain definition from this same file.
+                -->
+                <xsd:element name="book" type="tns:BookType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <!-- CreateBookOutput — the SERVER confirms creation with an ID and status.
+         Wire format:
+           <bk:CreateBookOutput>
+             <bk:bookId>BK-00004</bk:bookId>
+             <bk:status>CREATED</bk:status>
+             <bk:message>Book successfully registered in catalog</bk:message>
+           </bk:CreateBookOutput>
+    -->
+    <xsd:element name="CreateBookOutput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <!-- Server-generated unique identifier for this book record -->
+                <xsd:element name="bookId" type="xsd:string"/>
+
+                <!--
+                Status is a restricted string — acts like an enum.
+                Only "CREATED" or "DUPLICATE" are valid values.
+
+                xsd:restriction base="xsd:string" means: start with xsd:string
+                but allow ONLY the values listed in xsd:enumeration.
+
+                In Java, wsimport generates this as a plain String.
+                If you want a real Java enum you would add a JAXB binding
+                customisation file (bindings.xml) with jaxb:typesafeEnumClass.
+                -->
+                <xsd:element name="status">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:enumeration value="CREATED"/>
+                            <xsd:enumeration value="DUPLICATE"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
+
+                <!-- Human-readable confirmation message — optional (minOccurs="0") -->
+                <xsd:element name="message" type="xsd:string"/>
+
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

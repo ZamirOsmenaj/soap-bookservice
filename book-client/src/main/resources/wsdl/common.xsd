@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://bookservice.com/common/v1"
+        targetNamespace="http://bookservice.com/common/v1"
+        elementFormDefault="qualified">
+
+    <!-- WsFault ─────────────────────────────────────────────────────────── -->
+    <xsd:element name="WsFault">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="errorCode" type="xsd:string"/>
+                <xsd:element name="errorMessage" type="xsd:string"/>
+                <xsd:element name="errorTimestamp" type="xsd:dateTime"/>
+                <xsd:element name="operationName" type="xsd:string" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- WsCredentials.java ───────────────────────────────────────────────────── -->
+    <xsd:element name="WsCredentials">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="username" type="xsd:string"/>
+                <xsd:element name="password" type="xsd:string"/>
+                <xsd:element name="systemId" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

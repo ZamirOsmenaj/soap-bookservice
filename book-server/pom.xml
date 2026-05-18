@@ -16,14 +16,40 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!--
+    No runtime dependencies needed.
+    All JAX-WS, JAXB, and javax.jws.* APIs are part of Java 8.
+    -->
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.bookservice.ws.ServerMain</mainClass>
+                        </manifest>
+                    </archive>
+                    <finalName>book-server</finalName>
+                </configuration>
             </plugin>
         </plugins>
+
+        <!--
+        Include ALL resources from src/main/resources on the classpath.
+        This covers:
+          • wsdl/GetBook.wsdl, wsdl/CreateBook.wsdl  (referenced by wsdlLocation in @WebService)
+          • wsdl/common.xsd, wsdl/book.xsd  (imported by the WSDLs)
+          • handler-chain.xml  (referenced by @HandlerChain)
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
     </build>
 
 </project>

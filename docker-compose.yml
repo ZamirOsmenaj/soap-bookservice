@@ -1,0 +1,55 @@
+# =============================================================================
+# Docker Compose — Book Service Demo
+# =============================================================================
+# Two services:
+#
+#   book-server   → The SOAP server. Publishes two endpoints:
+#                   http://localhost:8080/getbook
+#                   http://localhost:8080/createbook
+#
+#   book-client   → Auto-generated client. Uses Maven + wsimport to build,
+#                   then runs BookClient.java against the server.
+#                   Exits after completing all demo calls.
+#
+# =============================================================================
+
+services:
+
+  # ─── SOAP Server ────────────────────────────────────────────────────────────
+  book-server:
+    build:
+      context: ./book-server
+      dockerfile: Dockerfile
+    container_name: book-server
+    ports:
+      # Expose both endpoints to your host machine so you can:
+      #   • Browse the WSDLs at http://localhost:8080/getbook?wsdl
+      #   • Use curl to send raw SOAP requests
+      - "8080:8080"
+    networks:
+      - bookservice-net
+    healthcheck:
+      # The server is "healthy" when the GetBook WSDL responds
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/getbook?wsdl | grep -q 'GetBookService' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
+  # ─── Auto-generated Client (Maven + wsimport) ────────────────────────────────
+  book-client:
+    build:
+      context: ./book-client
+      dockerfile: Dockerfile
+    container_name: book-client
+    depends_on:
+      book-server:
+        condition: service_healthy
+    networks:
+      - bookservice-net
+    # This container exits after printing its demo output.
+    # That is intentional — it is a one-shot client, not a long-running service.
+
+networks:
+  bookservice-net:
+    driver: bridge

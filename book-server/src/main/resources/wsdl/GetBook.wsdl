@@ -48,14 +48,14 @@
 ║                                                                              ║
 ║  XSD FILES IMPORTED BY THIS WSDL:                                            ║
 ║    • book.xsd    → GetBookInput, GetBookOutput (and all other book ops)      ║
-║    • common.xsd  → WsFault, WsCredentials.java                                    ║
+║    • common.xsd  → WsFault, WsCredentials.java                               ║
 ║                                                                              ║
 ║  NAMESPACE PREFIXES USED IN THIS FILE:                                       ║
 ║    wsdl: → standard WSDL elements  (wsdl:types, wsdl:message, etc.)          ║
 ║    soap: → SOAP binding elements   (soap:binding, soap:body, etc.)           ║
 ║    tns:  → this namespace          (our messages, portType, binding)         ║
 ║    bk:   → book XSD namespace      (GetBookInput, GetBookOutput, etc.)       ║
-║    cmn:  → common XSD namespace    (WsFault, WsCredentials.java)                  ║
+║    cmn:  → common XSD namespace    (WsFault, WsCredentials.java)             ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 -->
 

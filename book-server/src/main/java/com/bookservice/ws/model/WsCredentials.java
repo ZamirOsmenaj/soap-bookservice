@@ -9,10 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 // =============================================================================
 // WsCredentials — the SOAP Header authentication object
 // =============================================================================
-// Maps to <xsd:element name="WsCredentials" type="cmn:WsCredentialsType"> in common.xsd.
-//
-// This object is passed as a SOAP Header parameter in every operation.
-// It is annotated with @WebParam(header = true) in the SEI interfaces.
+// Maps to <xsd:element name="WsCredentials"> in common.xsd.
 //
 // Wire format (inside the SOAP Envelope Header):
 //   <soapenv:Header>

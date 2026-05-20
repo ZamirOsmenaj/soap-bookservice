@@ -32,7 +32,7 @@
             ════════════════════════════════════════════════════════════════════
             JAX-WS Maven Plugin (official JAX-WS RI plugin)
             ════════════════════════════════════════════════════════════════════
-            We use com.sun.xml.ws:jaxws-maven-plugin instead of the
+            We could also use com.sun.xml.ws:jaxws-maven-plugin instead of the
             org.codehaus.mojo variant because the codehaus version 2.x bundles
             a broken wsimport that silently skips XSD imports, producing stubs
             without any of the type classes (GetBookInput, WsCredentials, etc.).

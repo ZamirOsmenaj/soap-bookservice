@@ -54,10 +54,6 @@
         @javax.xml.bind.annotation.XmlNs(
             prefix       = "bk",
             namespaceURI = "http://bookservice.com/book/v1"
-        ),
-        @javax.xml.bind.annotation.XmlNs(
-            prefix       = "bk",
-            namespaceURI = "http://bookservice.com/book/v1"
         )
     }
 )

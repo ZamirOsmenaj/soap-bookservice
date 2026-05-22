@@ -1,7 +1,7 @@
 # =============================================================================
 # Docker Compose — Book Service Demo
 # =============================================================================
-# Two services:
+# Three services:
 #
 #   book-server   → The SOAP server. Publishes two endpoints:
 #                   http://localhost:8080/getbook
@@ -11,6 +11,9 @@
 #                   then runs BookClient.java against the server.
 #                   Exits after completing all demo calls.
 #
+#   dev-tools     → Interactive container. Has JDK8 + wsimport + Ant.
+#                   Stays alive so you can exec into it and run commands manually.
+#                   This is the "manual workflow" container.
 # =============================================================================
 
 services:
@@ -49,6 +52,22 @@ services:
       - bookservice-net
     # This container exits after printing its demo output.
     # That is intentional — it is a one-shot client, not a long-running service.
+
+  # ─── Dev Tools (manual workflow) ─────────────────────────────────────────────
+  dev-tools:
+    build:
+      context: ./dev-tools
+      dockerfile: Dockerfile
+    container_name: dev-tools
+    depends_on:
+      book-server:
+        condition: service_healthy
+    networks:
+      - bookservice-net
+    # Stays alive so you can connect with: docker exec -it dev-tools bash
+    # CMD in Dockerfile is: tail -f /dev/null
+    stdin_open: true
+    tty: true
 
 networks:
   bookservice-net:

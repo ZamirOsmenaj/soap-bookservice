@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://bookservice.com/getbook/wsdl/v1"
+        xmlns:bk="http://bookservice.com/book/v1"
+        xmlns:cmn="http://bookservice.com/common/v1"
+        name="GetBookService"
+        targetNamespace="http://bookservice.com/getbook/wsdl/v1">
+
+    <!-- ══ SECTION 1: Types — import external XSD files ══════════════════════ -->
+    <wsdl:types>
+        <xsd:schema>
+            <!-- All book operation types: GetBookInput/Output, CreateBookInput/Output -->
+            <xsd:import
+                    namespace="http://bookservice.com/book/v1"
+                    schemaLocation="book.xsd"/>
+            <!-- Shared types: WsFault, WsCredentials.java -->
+            <xsd:import
+                    namespace="http://bookservice.com/common/v1"
+                    schemaLocation="common.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- ══ SECTION 2: Messages ═══════════════════════════════════════════════ -->
+    <!-- GetBookRequest: client → server (wraps bk:GetBookInput from book.xsd) -->
+    <wsdl:message name="GetBookRequest">
+        <wsdl:part element="bk:GetBookInput" name="GetBookInput"/>
+    </wsdl:message>
+
+    <!-- GetBookResponse: server → client (wraps bk:GetBookOutput from book.xsd) -->
+    <wsdl:message name="GetBookResponse">
+        <wsdl:part element="bk:GetBookOutput" name="GetBookOutput"/>
+    </wsdl:message>
+
+    <!-- WsException: server → client on error (wraps cmn:WsFault from common.xsd) -->
+    <wsdl:message name="WsException">
+        <wsdl:part name="WsFault" element="cmn:WsFault"/>
+    </wsdl:message>
+
+    <!-- ══ SECTION 3: PortType ═══════════════════════════════════════════════ -->
+    <!-- name="GetBookPortType" → Java interface: GetBookPortType.java -->
+    <wsdl:portType name="GetBookPortType">
+        <wsdl:operation name="GetBook">
+            <wsdl:input  message="tns:GetBookRequest"  name="GetBookRequest"/>
+            <wsdl:output message="tns:GetBookResponse" name="GetBookResponse"/>
+            <wsdl:fault  message="tns:WsException"     name="WsException"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- ══ SECTION 4: Binding ════════════════════════════════════════════════ -->
+    <wsdl:binding name="GetBookBinding" type="tns:GetBookPortType">
+        <!-- document/literal over HTTP — the modern SOAP standard -->
+        <soap:binding
+                style="document"
+                transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="GetBook">
+            <!-- soapAction allows routers/firewalls to identify the operation -->
+            <soap:operation soapAction="GetBook"/>
+
+            <wsdl:input  name="GetBookRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+
+            <wsdl:output name="GetBookResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+
+            <wsdl:fault name="WsException">
+                <soap:fault name="WsException" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- ══ SECTION 5: Service ════════════════════════════════════════════════ -->
+    <wsdl:service name="GetBookService">
+        <wsdl:port binding="tns:GetBookBinding" name="GetBookPort">
+            <!-- Docker: "book-server" resolves to the server container hostname -->
+            <soap:address location="http://book-server:8080/getbook"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -490,7 +490,7 @@ targetNamespace="http://bookservice.com/getbook/wsdl/v1"
           This tells the client: "use GetBookBinding rules to encode/decode
           messages when talking to this port."
 
-      <soap:address location="http://book-server:8080/getbook"/>
+      <soap:address location="http://book-server:8080/getbook"/> will be used.
         → THE ACTUAL URL WHERE THE SERVICE ACCEPTS SOAP REQUESTS.
         → "book-server" is the Docker container hostname — inside Docker's
           network, containers resolve each other by their service name as
@@ -506,7 +506,7 @@ targetNamespace="http://bookservice.com/getbook/wsdl/v1"
     -->
     <wsdl:service name="GetBookService">
         <wsdl:port binding="tns:GetBookBinding" name="GetBookPort">
-            <soap:address location="http://book-server:8080/getbook"/>
+            <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
         </wsdl:port>
     </wsdl:service>
 

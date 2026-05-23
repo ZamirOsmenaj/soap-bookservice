@@ -71,7 +71,7 @@
     <!-- ══ SECTION 5: Service ════════════════════════════════════════════════ -->
     <wsdl:service name="CreateBookService">
         <wsdl:port binding="tns:CreateBookBinding" name="CreateBookPort">
-            <soap:address location="http://book-server:8080/createbook"/>
+            <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
         </wsdl:port>
     </wsdl:service>
 

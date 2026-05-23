@@ -77,8 +77,7 @@
     <!-- ══ SECTION 5: Service ════════════════════════════════════════════════ -->
     <wsdl:service name="GetBookService">
         <wsdl:port binding="tns:GetBookBinding" name="GetBookPort">
-            <!-- Docker: "book-server" resolves to the server container hostname -->
-            <soap:address location="http://book-server:8080/getbook"/>
+            <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
         </wsdl:port>
     </wsdl:service>
 

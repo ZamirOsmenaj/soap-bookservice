@@ -282,7 +282,7 @@ public class BookClient {
                     header = envelope.addHeader();
                 }
 
-                QName credQName = new QName(CMN_NS, "WsCredentials.java", "cmn");
+                QName credQName = new QName(CMN_NS, "WsCredentials", "cmn");
                 SOAPHeaderElement credEl = header.addHeaderElement(credQName);
 
                 SOAPElement userEl = credEl.addChildElement(

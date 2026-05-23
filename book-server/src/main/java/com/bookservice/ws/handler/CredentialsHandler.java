@@ -39,7 +39,7 @@ public class CredentialsHandler implements SOAPHandler<SOAPMessageContext> {
 
     // Namespace constants — these must match common.xsd and the SEI
     private static final String CMN_NS   = "http://bookservice.com/common/v1";
-    private static final String CRED_EL  = "WsCredentials.java";
+    private static final String CRED_EL  = "WsCredentials";
     private static final String USER_EL  = "username";
     private static final String PASS_EL  = "password";
 
@@ -96,7 +96,7 @@ public class CredentialsHandler implements SOAPHandler<SOAPMessageContext> {
 
             if (header == null) {
                 System.err.println("[CredentialsHandler] REJECTED: No SOAP Header present.");
-                throwAuthFault(context, "Missing SOAP Header: WsCredentials.java is required.");
+                throwAuthFault(context, "Missing SOAP Header: WsCredentials is required.");
                 return false;
             }
 
@@ -116,8 +116,8 @@ public class CredentialsHandler implements SOAPHandler<SOAPMessageContext> {
                     new QName(CMN_NS, CRED_EL));
 
             if (!credIterator.hasNext()) {
-                System.err.println("[CredentialsHandler] REJECTED: WsCredentials.java element not found in header.");
-                throwAuthFault(context, "Missing WsCredentials.java in SOAP Header.");
+                System.err.println("[CredentialsHandler] REJECTED: WsCredentials element not found in header.");
+                throwAuthFault(context, "Missing WsCredentials in SOAP Header.");
                 return false;
             }
 
@@ -129,7 +129,7 @@ public class CredentialsHandler implements SOAPHandler<SOAPMessageContext> {
 
             if (username == null || password == null) {
                 System.err.println("[CredentialsHandler] REJECTED: Missing username or password.");
-                throwAuthFault(context, "WsCredentials.java must contain username and password.");
+                throwAuthFault(context, "WsCredentials must contain username and password.");
                 return false;
             }
 

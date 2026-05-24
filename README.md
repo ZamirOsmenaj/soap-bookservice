@@ -11,6 +11,7 @@ The project includes:
 - Dockerized development workflow
 
 Everything runs inside Docker for a fully reproducible environment.
+
 ---
 
 ## Table of Contents

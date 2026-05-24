@@ -1,6 +1,16 @@
-# Book Service — Real-World SOAP Demo
-## Java 8 · Maven · Docker · JAX-WS · No Spring
+# Book Service — SOAP Web Service Demo
 
+This project demonstrates how a real-world **SOAP-based web service** works using **JAX-WS**, **WSDL**, and **JAXB** in plain Java without Spring or heavyweight frameworks.
+
+The project includes:
+- Contract-first SOAP development
+- XML schema validation
+- SOAP headers and authentication
+- Custom SOAP faults
+- Generated client stubs
+- Dockerized development workflow
+
+Everything runs inside Docker for a fully reproducible environment.
 ---
 
 ## Table of Contents

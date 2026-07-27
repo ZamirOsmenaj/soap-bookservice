@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://bookservice.com/book/v1"
+        targetNamespace="http://bookservice.com/book/v1"
+        elementFormDefault="qualified">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         BookType — Core book domain object
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <xsd:complexType name="BookType">
+        <xsd:sequence>
+            <xsd:element name="isbn"          type="xsd:string"/>
+            <xsd:element name="title"         type="xsd:string"/>
+            <xsd:element name="author"        type="xsd:string"/>
+            <xsd:element name="price"         type="xsd:decimal"/>
+            <xsd:element name="stockQuantity" type="xsd:int"/>
+            <xsd:element name="genre"         type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- GetBookInput / GetBookOutput ──────────────────────────────────────── -->
+    <xsd:element name="GetBookInput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="isbn" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="GetBookOutput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="book" type="tns:BookType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- CreateBookInput / CreateBookOutput ────────────────────────────────── -->
+    <xsd:element name="CreateBookInput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="book" type="tns:BookType"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="CreateBookOutput">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="bookId" type="xsd:string"/>
+                <xsd:element name="status">
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:string">
+                            <xsd:enumeration value="CREATED"/>
+                            <xsd:enumeration value="DUPLICATE"/>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:element>
+                <xsd:element name="message" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

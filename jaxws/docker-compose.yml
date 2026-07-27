@@ -1,0 +1,68 @@
+# =============================================================================
+# Docker Compose — Book Service (Plain Java / JAX-WS)
+# =============================================================================
+# Three services:
+#
+#   book-server   → JAX-WS SOAP server. Publishes two endpoints:
+#                   http://localhost:8080/getbook
+#                   http://localhost:8080/createbook
+#
+#   book-client   → wsimport-generated stubs client. Runs demo scenarios
+#                   and exits (one-shot).
+#
+#   dev-tools     → Interactive container (JDK8 + wsimport + Ant).
+#                   Stays alive so you can exec in and run things manually.
+#
+# Run:
+#   docker compose up --build
+#
+# WSDLs (server must be running):
+#   http://localhost:8080/getbook?wsdl
+#   http://localhost:8080/createbook?wsdl
+# =============================================================================
+
+services:
+
+  book-server:
+    build:
+      context: ./book-server
+      dockerfile: Dockerfile
+    container_name: book-server
+    ports:
+      - "8080:8080"
+    networks:
+      - bookservice-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/getbook?wsdl | grep -q 'GetBookService' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
+  book-client:
+    build:
+      context: ./book-client
+      dockerfile: Dockerfile
+    container_name: book-client
+    depends_on:
+      book-server:
+        condition: service_healthy
+    networks:
+      - bookservice-net
+
+  dev-tools:
+    build:
+      context: ./dev-tools
+      dockerfile: Dockerfile
+    container_name: dev-tools
+    depends_on:
+      book-server:
+        condition: service_healthy
+    networks:
+      - bookservice-net
+    stdin_open: true
+    tty: true
+
+networks:
+  bookservice-net:
+    driver: bridge

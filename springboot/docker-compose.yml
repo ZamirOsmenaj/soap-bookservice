@@ -1,0 +1,53 @@
+# =============================================================================
+# Docker Compose — Book Service (Spring Boot / Spring-WS)
+# =============================================================================
+# Two services:
+#
+#   spring-book-server → Spring Boot / Spring-WS SOAP server.
+#                        All operations served under /ws/*:
+#                          POST http://localhost:8080/ws/getbook
+#                          POST http://localhost:8080/ws/createbook
+#
+#   spring-book-client → WebServiceTemplate-based client. Runs demo scenarios
+#                        and exits (one-shot).
+#
+# Run:
+#   docker compose up --build
+#
+# WSDLs (server must be running):
+#   http://localhost:8080/ws/getbook.wsdl
+#   http://localhost:8080/ws/createbook.wsdl
+# =============================================================================
+
+services:
+
+  spring-book-server:
+    build:
+      context: ./spring-book-server
+      dockerfile: Dockerfile
+    container_name: spring-book-server
+    ports:
+      - "8080:8080"
+    networks:
+      - bookservice-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/ws/getbook.wsdl | grep -q 'GetBookService' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+
+  spring-book-client:
+    build:
+      context: ./spring-book-client
+      dockerfile: Dockerfile
+    container_name: spring-book-client
+    depends_on:
+      spring-book-server:
+        condition: service_healthy
+    networks:
+      - bookservice-net
+
+networks:
+  bookservice-net:
+    driver: bridge

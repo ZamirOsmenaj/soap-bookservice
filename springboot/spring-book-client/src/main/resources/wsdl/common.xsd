@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  common.xsd  — SHARED INFRASTRUCTURE TYPE DEFINITIONS                        ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  This file defines CROSS-CUTTING types reused across ALL services and        ║
+║  operations, regardless of domain.                                           ║
+║                                                                              ║
+║  Defines:                                                                    ║
+║    • WsFault        — standard error/fault structure                         ║
+║    • WsCredentials.java  — SOAP header for authentication                    ║
+║                                                                              ║
+║  Intentionally does NOT contain domain objects (e.g. BookType).              ║
+║  Domain types belong in their respective domain XSD files (e.g. book.xsd).   ║
+║  A type earns a place here only if it is truly service-agnostic —            ║
+║  credentials and fault envelopes are the same shape regardless of whether    ║
+║  you are calling a BookService, an OrderService, or a PaymentService.        ║
+║                                                                              ║
+║  WHY a separate XSD file?                                                    ║
+║    • Multiple operations and services share the same infra types (DRY)       ║
+║    • XSD files can be validated independently with tools                     ║
+║    • Type libraries can be versioned and shared across services              ║
+║    • IDEs give better auto-complete when schemas are in separate files       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<xsd:schema
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://bookservice.com/common/v1"
+        targetNamespace="http://bookservice.com/common/v1"
+        elementFormDefault="qualified">
+
+    <!--
+    ════════════════════════════════════════════════════════════════════════════
+    elementFormDefault="qualified"
+    ════════════════════════════════════════════════════════════════════════════
+    This attribute controls whether locally-defined elements in the XML
+    instance document must be namespace-qualified.
+
+    "qualified"  → every element in instance XML must carry the namespace.
+                   e.g.: <cmn:errorCode>BOOK_NOT_FOUND</cmn:errorCode>
+                   This is the MODERN STANDARD for SOAP/document/literal.
+
+    "unqualified" → only top-level elements need a namespace prefix.
+                    This was common in older SOAP services.
+
+    We use "qualified" throughout this project — it is unambiguous and
+    plays well with JAX-WS marshalling.
+    ════════════════════════════════════════════════════════════════════════════
+    -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         WsFault — Standard error structure
+         ═══════════════════════════════════════════════════════════════════════
+         This element is referenced by the <wsdl:fault> in every WSDL operation
+         across ALL services. When the server throws a WsException, this is what
+         appears in the SOAP Fault detail block:
+
+           <soapenv:Fault>
+             <faultcode>soapenv:Server</faultcode>
+             <faultstring>Business error occurred</faultstring>
+             <detail>
+               <cmn:WsFault>
+                 <cmn:errorCode>BOOK_NOT_FOUND</cmn:errorCode>
+                 <cmn:errorMessage>No book found with ISBN 978-x</cmn:errorMessage>
+                 <cmn:errorTimestamp>2024-01-15T10:30:00</cmn:errorTimestamp>
+               </cmn:WsFault>
+             </detail>
+           </soapenv:Fault>
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <xsd:element name="WsFault">
+        <xsd:complexType>
+            <xsd:sequence>
+
+                <!-- Machine-readable error code. Clients can switch() on this. -->
+                <xsd:element name="errorCode" type="xsd:string"/>
+
+                <!-- Human-readable description of what went wrong. -->
+                <xsd:element name="errorMessage" type="xsd:string"/>
+
+                <!--
+                xsd:dateTime format: 2024-01-15T10:30:00  or  2024-01-15T10:30:00Z
+                The 'Z' suffix means UTC. Without it, timezone is unspecified.
+                Maps to javax.xml.datatype.XMLGregorianCalendar in Java.
+                -->
+                <xsd:element name="errorTimestamp" type="xsd:dateTime"/>
+
+                <!--
+                minOccurs="0" → optional field.
+                Carries the name of the operation that failed.
+                Useful for logging when one service calls many others.
+                -->
+                <xsd:element name="operationName" type="xsd:string" minOccurs="0"/>
+
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         WsCredentials.java — SOAP Header authentication block
+         ═══════════════════════════════════════════════════════════════════════
+         This element is placed in the SOAP <Header> (not the Body).
+         The server reads it via a JAX-WS Handler before the operation runs.
+         It is service-agnostic: any service that needs authentication reuses
+         this same structure without modification.
+
+         Wire format example:
+           <soapenv:Header>
+             <cmn:WsCredentials.java>
+               <cmn:username>myapp</cmn:username>
+               <cmn:password>secret123</cmn:password>
+               <cmn:systemId>FRONT_OFFICE</cmn:systemId>
+             </cmn:WsCredentials.java>
+           </soapenv:Header>
+
+         In a real production system you would:
+           • Use WS-Security (UsernameToken profile) instead of plain text passwords
+           • Or pass a signed JWT token in a custom header
+           • Or use mutual TLS at the transport level
+         For this demo, plain credentials in the header demonstrate the mechanism.
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <xsd:element name="WsCredentials">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="username" type="xsd:string"/>
+                <xsd:element name="password" type="xsd:string"/>
+                <!--
+                systemId identifies the calling application.
+                Useful for audit trails: "which system made this call?"
+                -->
+                <xsd:element name="systemId" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
